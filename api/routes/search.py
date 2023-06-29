@@ -13,7 +13,7 @@ from db import vector_store
 
 router = APIRouter()
 _db = vector_store.get_instance()
-_chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff")
+_chain = load_qa_chain(OpenAI(temperature=0), chain_type="map_reduce")
 
 @router.post("/v1/docs")
 async def index_doc(file: UploadFile = File(...)):
@@ -26,6 +26,7 @@ async def index_doc(file: UploadFile = File(...)):
 async def search(query: str):
     print(query)
     docs = _db.similarity_search(query=query)
+    print(docs)
     answer = _chain.run(input_documents=docs, question=query)
     return JSONResponse(status_code=200, content={"answer": answer}) 
 
