@@ -1,0 +1,11 @@
+openai
+uvicorn
+fastapi
+python-multipart
+numpy
+pypdf
+langchain
+tiktoken
+faiss-cpu
+qdrant-client
+
