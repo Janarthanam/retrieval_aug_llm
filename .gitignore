@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Testing directories
+/.pytest_cache/
+/nose-timer-master/
+
+# Environment and compiled files
+.env
+.env.local
+.env.*.local
+*.pyc
+*.swp
+*.bak
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Distribution / packaging
+/dist/
+/build/
+*.egg-info/
+
+# Project specific
+/config.yml
+/instance/
+/static/
