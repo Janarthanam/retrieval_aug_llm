@@ -10,6 +10,9 @@ router = APIRouter()
 
 @router.put("/admin/v1/db")
 async def recreate_collection(name: Annotated[str, Body(embed=True)]):
+    """ `name` of the collection to be created.
+    If one exits, delete and recreate.
+    """
     print(f"creating collection {name} in db")
     return vector_store.client.recreate_collection(collection_name=name, 
                                             vectors_config=VectorParams(size=1536, distance=Distance.COSINE))
