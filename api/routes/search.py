@@ -17,7 +17,13 @@ router = APIRouter()
 _chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff")
 
 @router.post("/v1/docs")
-async def index_doc(name: Annotated[str, Body()], fileName: Annotated[str, Body()], file: UploadFile = File(...)):
+async def create_or_update(name: Annotated[str, Body()], fileName: Annotated[str, Body()], file: UploadFile = File(...)):
+    """create or update a collection 
+    `name` of the collection
+    `file` to upload.
+    `fileName` name of the file.
+    """
+
     _db = vector_store.get_instance(name)
     if not _db:
         return JSONResponse(status_code=404, content={})
@@ -27,8 +33,12 @@ async def index_doc(name: Annotated[str, Body()], fileName: Annotated[str, Body(
     #todo return something sensible
     return JSONResponse(status_code=200, content={"name": name})
 
-@router.get("/v1/answers/{name}")
-async def search(name: str, query: str):
+@router.get("/v1/doc/{name}/answer")
+async def answer(name: str, query: str):
+    """ Answer a question from the collection
+    `name` of the collection.
+    `query` to be answered.
+    """
     _db = vector_store.get_instance(name)
     print(query)
     docs = _db.similarity_search(query=query)
