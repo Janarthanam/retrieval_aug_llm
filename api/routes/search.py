@@ -1,4 +1,6 @@
-from fastapi import APIRouter, UploadFile, File
+from typing import Annotated
+
+from fastapi import APIRouter, UploadFile, File, Body
 from fastapi.responses import JSONResponse
 import openai
 import io
@@ -12,29 +14,33 @@ from langchain.llms import OpenAI
 from db import vector_store
 
 router = APIRouter()
-_db = vector_store.get_instance()
-_chain = load_qa_chain(OpenAI(temperature=0), chain_type="map_reduce")
+_chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff")
 
 @router.post("/v1/docs")
-async def index_doc(file: UploadFile = File(...)):
-    async for doc in generate_documents(file):
+async def index_doc(name: Annotated[str, Body()], fileName: Annotated[str, Body()], file: UploadFile = File(...)):
+    _db = vector_store.get_instance(name)
+    if not _db:
+        return JSONResponse(status_code=404, content={})
+    async for doc in generate_documents(file, fileName):
+        print(doc)
         _db.add_documents([doc])
     #todo return something sensible
-    return JSONResponse(status_code=200, content={})
+    return JSONResponse(status_code=200, content={"name": name})
 
-@router.get("/v1/docs")
-async def search(query: str):
+@router.get("/v1/answers/{name}")
+async def search(name: str, query: str):
+    _db = vector_store.get_instance(name)
     print(query)
     docs = _db.similarity_search(query=query)
     print(docs)
     answer = _chain.run(input_documents=docs, question=query)
-    return JSONResponse(status_code=200, content={"answer": answer}) 
+    return JSONResponse(status_code=200, content={"answer": answer, "files": [d.metadata["file"] for d in docs]}) 
 
-async def generate_documents(file: UploadFile):
+async def generate_documents(file: UploadFile, fileName: str):
     num=0
     async for txt in convert_documents(file):
         num += 1
-        document = Document(page_content=txt,metadata={"page": num})
+        document = Document(page_content=txt,metadata={"file": fileName, "page": num})
         yield document
  
 async def convert_documents(file: UploadFile):
