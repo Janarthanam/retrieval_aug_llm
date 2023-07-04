@@ -14,10 +14,10 @@ from langchain.llms import OpenAI
 from db import vector_store
 
 router = APIRouter()
-_chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff")
+_chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", verbose=True)
 
 @router.post("/v1/docs")
-async def create_or_update(name: Annotated[str, Body()], fileName: Annotated[str, Body()], file: UploadFile = File(...)):
+async def create_or_update(name: Annotated[str, Body()], file_name: Annotated[str, Body()], file: UploadFile = File(...)):
     """create or update a collection 
     `name` of the collection
     `file` to upload.
@@ -27,7 +27,7 @@ async def create_or_update(name: Annotated[str, Body()], fileName: Annotated[str
     _db = vector_store.get_instance(name)
     if not _db:
         return JSONResponse(status_code=404, content={})
-    async for doc in generate_documents(file, fileName):
+    async for doc in generate_documents(file, file_name):
         print(doc)
         _db.add_documents([doc])
     #todo return something sensible
@@ -46,11 +46,11 @@ async def answer(name: str, query: str):
     answer = _chain.run(input_documents=docs, question=query)
     return JSONResponse(status_code=200, content={"answer": answer, "files": [d.metadata["file"] for d in docs]}) 
 
-async def generate_documents(file: UploadFile, fileName: str):
+async def generate_documents(file: UploadFile, file_name: str):
     num=0
     async for txt in convert_documents(file):
         num += 1
-        document = Document(page_content=txt,metadata={"file": fileName, "page": num})
+        document = Document(page_content=txt,metadata={"file": file_name, "page": num})
         yield document
  
 async def convert_documents(file: UploadFile):
