@@ -30,6 +30,7 @@ async def create_or_update(name: Annotated[str, Body()], file_name: Annotated[st
     async for doc in generate_documents(file, file_name):
         print(doc)
         _db.add_documents([doc])
+
     #todo return something sensible
     return JSONResponse(status_code=200, content={"name": name})
 
