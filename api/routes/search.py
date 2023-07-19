@@ -41,10 +41,10 @@ async def answer(name: str, query: str):
     """
     _db = vector_store.get_instance(name)
     print(query)
-    docs = _db.similarity_search(query=query)
+    docs = _db.similarity_search_with_relevance_scores(query=query)
     print(docs)
-    answer = _chain.run(input_documents=docs, question=query)
-    return JSONResponse(status_code=200, content={"answer": answer, "files": [d.metadata["file"] for d in docs]}) 
+    answer = _chain.run(input_documents=[tup[0] for tup in docs], question=query)
+    return JSONResponse(status_code=200, content={"answer": answer, "file_score": [[f"{d[0].metadata['file']} : {d[0].metadata['page']}", d[1]] for d in docs]}) 
 
 async def generate_documents(file: UploadFile, file_name: str):
     num=0
