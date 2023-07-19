@@ -17,6 +17,6 @@ COPY api .
 EXPOSE 8080
 
 ENV OPENAI_API_KEY=zzz
-ENV QDRANT_API_KEY=yyy
+ENV QDRANT_URL="https://32f125d3-5ab1-4058-a10a-bd38a1ebd647.us-east-1-0.aws.cloud.qdrant.io"
 # Start the application using Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
