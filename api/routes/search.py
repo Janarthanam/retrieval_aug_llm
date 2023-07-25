@@ -11,22 +11,24 @@ from langchain.vectorstores import Qdrant
 from langchain.schema import Document
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
-from db import vector_store
+from db.vector_store import ToyVectorStore
 
 router = APIRouter()
 _chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", verbose=True)
 
 @router.post("/v1/docs")
 async def create_or_update(name: Annotated[str, Body()], file_name: Annotated[str, Body()], file: UploadFile = File(...)):
-    """create or update a collection 
+    """Create or update an existing collection with information from the file 
     `name` of the collection
     `file` to upload.
     `fileName` name of the file.
     """
 
-    _db = vector_store.get_instance(name)
+    _db = ToyVectorStore.get_instance().get_collection(name)
     if not _db:
+        #todo. fix this to create a collection, may be.
         return JSONResponse(status_code=404, content={})
+
     async for doc in generate_documents(file, file_name):
         print(doc)
         _db.add_documents([doc])
@@ -39,9 +41,9 @@ async def answer(name: str, query: str):
     `name` of the collection.
     `query` to be answered.
     """
-    _db = vector_store.get_instance(name)
+    _db = ToyVectorStore.get_instance().get_collection(name)
     print(query)
-    docs = _db.similarity_search_with_relevance_scores(query=query)
+    docs = _db.similarity_search_with_score(query=query)
     print(docs)
     answer = _chain.run(input_documents=[tup[0] for tup in docs], question=query)
     return JSONResponse(status_code=200, content={"answer": answer, "file_score": [[f"{d[0].metadata['file']} : {d[0].metadata['page']}", d[1]] for d in docs]}) 

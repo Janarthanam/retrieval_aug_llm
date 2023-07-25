@@ -2,9 +2,8 @@
 
 from typing import Annotated
 
-from qdrant_client.models import VectorParams, Distance
 from fastapi import APIRouter, Body
-from db import vector_store
+from db.vector_store import ToyVectorStore
 
 router = APIRouter()
 
@@ -14,5 +13,4 @@ async def recreate_collection(name: Annotated[str, Body(embed=True)]):
     If one exits, delete and recreate.
     """
     print(f"creating collection {name} in db")
-    return vector_store.client.recreate_collection(collection_name=name, 
-                                            vectors_config=VectorParams(size=1536, distance=Distance.COSINE))
+    return ToyVectorStore.get_instance().create_collection(name)
