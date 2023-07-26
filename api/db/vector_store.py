@@ -1,11 +1,10 @@
 from abc import abstractmethod
 import os
 from qdrant_client import QdrantClient
-from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings import OpenAIEmbeddings, ElasticsearchEmbeddings
 from langchain.vectorstores import Qdrant, ElasticVectorSearch, VectorStore
 from qdrant_client.models import VectorParams, Distance
 
-embeddings = OpenAIEmbeddings()
 
 class ToyVectorStore:
 
@@ -18,7 +17,10 @@ class ToyVectorStore:
             return QdrantVectorStore()
         else:
             raise ValueError(f"Invalid vector store {vector_store}")
-            
+    
+    def __init__(self):
+        self.embeddings = OpenAIEmbeddings()
+
     @abstractmethod
     def get_collection(self, collection: str="test") -> VectorStore:
         """
@@ -36,9 +38,10 @@ class ToyVectorStore:
         pass
 
 class ElasticVectorStore(ToyVectorStore):
+
     def get_collection(self, collection:str) -> ElasticVectorSearch:
         return ElasticVectorSearch(elasticsearch_url= os.getenv("ES_URL"),
-                               index_name= collection, embedding=embeddings)
+                               index_name= collection, embedding=self.embeddings)
 
     def create_collection(self, collection: str) -> None:
         store = self.get_collection(collection)
@@ -52,7 +55,8 @@ class QdrantVectorStore(ToyVectorStore):
                                         api_key=os.getenv("QDRANT_API_KEY"))
 
     def get_collection(self, collection: str) -> Qdrant:  
-        return Qdrant(client=self.client,collection_name=collection,embeddings=embeddings)
+        return Qdrant(client=self.client,collection_name=collection,
+                      embeddings=self.embeddings)
 
     def create_collection(self, collection: str) -> None:
         self.client.create_collection(collection_name=collection, 
