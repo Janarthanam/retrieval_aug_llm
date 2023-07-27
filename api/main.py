@@ -21,6 +21,11 @@ app.include_router(search.router)
 app.include_router(admin.router)
 app.exception_handler(generic_exception_handler)
 
+app.add_middleware(CORSMiddleware, allow_origins = ["*"],
+                   allow_credentials=True,
+                   allow_methods=["GET","POST","PUT", "DELETE"],
+                   allow_headers = ["*"])
+
 @app.middleware("http")
 async def log_requests(request, call_next):
     start_time = datetime.utcnow()
