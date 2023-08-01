@@ -11,6 +11,7 @@ from langchain.vectorstores import Qdrant
 from langchain.schema import Document
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
+from langchain.text_splitter import SentenceTransformersTokenTextSplitter
 from db.vector_store import ToyVectorStore
 
 router = APIRouter()
@@ -50,20 +51,26 @@ async def answer(name: str, query: str):
 
 async def generate_documents(file: UploadFile, file_name: str):
     num=0
-    async for txt in convert_documents(file):
+    async for txts in convert_documents(file):
         num += 1
-        document = Document(page_content=txt,metadata={"file": file_name, "page": num})
-        yield document
+        for txt in txts:
+            document = Document(page_content=txt,metadata={"file": file_name, "page": num})
+            yield document
  
 async def convert_documents(file: UploadFile):
+    splitter = SentenceTransformersTokenTextSplitter(chunk_overlap=0)
+
     #parse pdf document
     if file.content_type == 'application/pdf':
         content = await file.read()
         pdf_reader = PdfReader(io.BytesIO(content))
         try:
             for page in pdf_reader.pages:
-                yield page.extract_text()
+                yield splitter.split_text(page.extract_text())
         except Exception as e:
             print(f"Exception {e}")
+    elif "text" in file.content_type:
+        content = await file.read()
+        yield splitter.split_text(content.decode("utf-8"))
     else:
         return
