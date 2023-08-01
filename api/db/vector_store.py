@@ -2,6 +2,7 @@ from abc import abstractmethod
 import os
 from qdrant_client import QdrantClient
 from langchain.embeddings import OpenAIEmbeddings, ElasticsearchEmbeddings
+from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from langchain.vectorstores import Qdrant, ElasticVectorSearch, VectorStore
 from qdrant_client.models import VectorParams, Distance
 
@@ -9,17 +10,29 @@ from qdrant_client.models import VectorParams, Distance
 class ToyVectorStore:
 
     @staticmethod
+    def get_embedding():
+        embedding = os.getenv("EMBEDDING")
+        if "SENTENCE" == embedding:
+            return SentenceTransformerEmbeddings()
+        elif "ELASTIC" == embedding:
+            return ElasticsearchEmbeddings()
+        else:
+            return OpenAIEmbeddings()
+
+    @staticmethod
     def get_instance():
         vector_store = os.getenv("STORE")
+
         if vector_store == "ELASTIC":
-            return ElasticVectorStore()
+            return ElasticVectorStore(ToyVectorStore.get_embedding())
         elif vector_store == "QDRANT":
-            return QdrantVectorStore()
+            return QdrantVectorStore(ToyVectorStore.get_embedding())
         else:
             raise ValueError(f"Invalid vector store {vector_store}")
     
-    def __init__(self):
-        self.embeddings = OpenAIEmbeddings()
+
+    def __init__(self, embeddings):
+        self.embeddings = embeddings
 
     @abstractmethod
     def get_collection(self, collection: str="test") -> VectorStore:
