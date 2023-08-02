@@ -6,8 +6,6 @@ import openai
 import io
 import os
 from pypdf import PdfReader
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.vectorstores import Qdrant
 from langchain.schema import Document
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
@@ -24,7 +22,7 @@ async def create_or_update(name: Annotated[str, Body()], file_name: Annotated[st
     `file` to upload.
     `fileName` name of the file.
     """
-
+    
     _db = ToyVectorStore.get_instance().get_collection(name)
     if not _db:
         #todo. fix this to create a collection, may be.
