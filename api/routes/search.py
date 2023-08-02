@@ -22,7 +22,7 @@ async def create_or_update(name: Annotated[str, Body()], file_name: Annotated[st
     `file` to upload.
     `fileName` name of the file.
     """
-    
+
     _db = ToyVectorStore.get_instance().get_collection(name)
     if not _db:
         #todo. fix this to create a collection, may be.
@@ -45,30 +45,29 @@ async def answer(name: str, query: str):
     docs = _db.similarity_search_with_score(query=query)
     print(docs)
     answer = _chain.run(input_documents=[tup[0] for tup in docs], question=query)
-    return JSONResponse(status_code=200, content={"answer": answer, "file_score": [[f"{d[0].metadata['file']} : {d[0].metadata['page']}", d[1]] for d in docs]}) 
+    return JSONResponse(status_code=200, 
+                        content={"answer": answer, 
+                                 "file_score": [[f"{d[0].metadata['file']} : {d[0].metadata['page']}", d[1]] for d in docs]})
 
 async def generate_documents(file: UploadFile, file_name: str):
     num=0
-    async for txts in convert_documents(file):
+    async for txt in convert_documents(file):
         num += 1
-        for txt in txts:
-            document = Document(page_content=txt,metadata={"file": file_name, "page": num})
-            yield document
+        document = Document(page_content=txt,metadata={"file": file_name, "page": num})
+        yield document
  
 async def convert_documents(file: UploadFile):
-    splitter = SentenceTransformersTokenTextSplitter(chunk_overlap=0)
-
     #parse pdf document
     if file.content_type == 'application/pdf':
         content = await file.read()
         pdf_reader = PdfReader(io.BytesIO(content))
         try:
             for page in pdf_reader.pages:
-                yield splitter.split_text(page.extract_text())
+                yield page.extract_text()
         except Exception as e:
             print(f"Exception {e}")
     elif "text" in file.content_type:
         content = await file.read()
-        yield splitter.split_text(content.decode("utf-8"))
+        yield content.decode("utf-8")
     else:
         return
