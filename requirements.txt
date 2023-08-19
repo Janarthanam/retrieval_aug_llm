@@ -10,3 +10,4 @@ faiss-cpu
 qdrant-client
 elasticsearch
 sentence_transformers
+doctran

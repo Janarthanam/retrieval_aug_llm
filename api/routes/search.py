@@ -11,9 +11,11 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain.text_splitter import SentenceTransformersTokenTextSplitter
 from db.vector_store import ToyVectorStore
+from doctran import Doctran
 
 router = APIRouter()
 _chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", verbose=True)
+doctran = Doctran(openai_api_key=os.getenv("OPENAI_API_KEY"))
 
 @router.post("/v1/docs")
 async def create_or_update(name: Annotated[str, Body()], file_name: Annotated[str, Body()], file: UploadFile = File(...)):
@@ -53,8 +55,12 @@ async def generate_documents(file: UploadFile, file_name: str):
     num=0
     async for txt in convert_documents(file):
         num += 1
-        document = Document(page_content=txt,metadata={"file": file_name, "page": num})
-        yield document
+        doc = doctran.parse(content=txt)
+        q_ans = await doc.interrogate().execute()
+        print(q_ans.extracted_properties)
+        for qa in q_ans.extracted_properties["questions_and_answers"]:
+            document = Document(page_content=str(qa),metadata={"file": file_name, "page": num})
+            yield document
  
 async def convert_documents(file: UploadFile):
     #parse pdf document
