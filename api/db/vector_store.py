@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from functools import cache
 import os
 from qdrant_client import QdrantClient
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
@@ -7,7 +8,7 @@ from qdrant_client.models import VectorParams, Distance
 from db.embedding import Embedding, EMBEDDINGS
 
 
-class ToyVectorStore:
+class Store:
 
     @staticmethod
     def get_embedding():
@@ -17,13 +18,14 @@ class ToyVectorStore:
         return EMBEDDINGS[embedding]
     
     @staticmethod
+    @cache
     def get_instance():
         vector_store = os.getenv("STORE")
 
         if vector_store == "ELASTIC":
-            return ElasticVectorStore(ToyVectorStore.get_embedding())
+            return ElasticVectorStore(Store.get_embedding())
         elif vector_store == "QDRANT":
-            return QdrantVectorStore(ToyVectorStore.get_embedding())
+            return QdrantVectorStore(Store.get_embedding())
         else:
             raise ValueError(f"Invalid vector store {vector_store}")
     
@@ -47,7 +49,14 @@ class ToyVectorStore:
         """
         pass
 
-class ElasticVectorStore(ToyVectorStore):
+    @abstractmethod
+    def list_collections(self) -> list[dict]:
+        """
+        Return a list of collections in the vecot store.
+        """
+        pass
+
+class ElasticVectorStore(Store):
     def __init__(self, embeddings):
         super().__init__(embeddings)
 
@@ -59,8 +68,11 @@ class ElasticVectorStore(ToyVectorStore):
         store = self.get_collection(collection)
         store.create_index(store.client,collection, dict())
 
+    def list_collections(self) -> list[dict]:
+        #TODO: not impelented
+        return []
 
-class QdrantVectorStore(ToyVectorStore):
+class QdrantVectorStore(Store):
 
     def __init__(self, embeddings):
         super().__init__(embeddings)
@@ -75,4 +87,9 @@ class QdrantVectorStore(ToyVectorStore):
         self.client.create_collection(collection_name=collection, 
                         vectors_config=VectorParams(size=self.embedding.dimension, 
                                                     distance=Distance.COSINE))
+    
+    def list_collections(self) -> list[dict]:
+        """ return a list of collections.
+        """
+        return [ c for i,c in enumerate(self.client.get_collections().collections)]
     

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from fastapi import FastAPI
-from routes import embeddings, search, admin
+from routes import search, upload
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
@@ -16,9 +16,8 @@ logger.addHandler(handler)
 
 # Create the FastAPI instance
 app = FastAPI()
-app.include_router(embeddings.router)
 app.include_router(search.router)
-app.include_router(admin.router)
+app.include_router(upload.router)
 app.exception_handler(generic_exception_handler)
 
 app.add_middleware(CORSMiddleware, allow_origins = ["*"],
