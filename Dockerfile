@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Copy the rest of the application code into the container
-COPY api .
+COPY run.sh api fe .
 
 # Expose the port the app runs on
 EXPOSE 8080
@@ -20,5 +20,7 @@ EXPOSE 8080
 ENV OPENAI_API_KEY=zzz
 ENV QDRANT_URL="https://32f125d3-5ab1-4058-a10a-bd38a1ebd647.us-east-1-0.aws.cloud.qdrant.io"
 ENV STORE="QDRANT"
+ENV be_url="http://127.0.0.1:8080"
+
 # Start the application using Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/bin/sh", "./run.sh"]
