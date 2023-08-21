@@ -16,11 +16,14 @@ router = APIRouter()
 _chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", verbose=True)
 
 
-@router.get("/v1/docs/{name}/answer")
+@router.get("/v1/datasets/{name}/answer")
 async def answer(name: str, query: str):
     """ Answer a question from the doc
-    `name` of the doc.
-    `query` to be answered.
+    Parameters:
+    - `name` of the doc.
+    - `query` to be answered.
+    Return:
+      a string answer to the query
     """
     _db = Store.get_instance().get_collection(name)
     print(query)
@@ -30,8 +33,11 @@ async def answer(name: str, query: str):
     return JSONResponse(status_code=200, content={"answer": answer, "file_score": [[f"{d[0].metadata['file']} : {d[0].metadata['page']}", d[1]] for d in docs]}) 
 
 
-@router.get("/v1/docs")
+@router.get("/v1/datasets")
 async def list() -> list[dict]:
-    """ List all the docs. 
+    """ List all the datasets avaialble to query.
+    :return:
+        list of datasets
     """
+    #TODO surface more metadata for individual datasets
     return Store.get_instance().list_collections()

@@ -11,23 +11,32 @@ from fastapi import APIRouter, UploadFile, File, Body
 
 router = APIRouter()
 
-@router.put("/v1/docs")
+@router.put("/v1/datasets")
 async def recreate_collection(name: Annotated[str, Body(embed=True)]):
-    """ `name` of the doc to be created.
-    If one exits, delete and recreate.
+    """ Create a dataset with `name`. 
+        **Delete and re-create if one exist.**
+
+    Parameters:
+        `name` of the doc to be created.
+    Returns:
+        None
     """
     print(f"creating collection {name} in db")
     return Store.get_instance().create_collection(name)
 
-@router.post("/v1/docs")
+@router.post("/v1/datasets")
 async def update(name: Annotated[str, Body()], file_name: Annotated[str, Body()], file: UploadFile = File(...)):
-    """Update an existing document with information from the file.
-    If one doesn't exist with name, it creates a new document to update. 
-    `name` of the collection
-    `file` to upload.
-    `fileName` name of the file. This is used for metadata purposes only.
+    """Update dataset `name` with information from the file.
+    Paramters:
+        `name` of the collection
+        `file` to upload.
+        `fileName` name of the file. This is used for metadata purposes only.
+    Returns:
+        name of the dataset once updated.
     """
     
+    #TODO return meaningful info
+
     _db = Store.get_instance().get_collection(name)
     if not _db:
         return JSONResponse(status_code=404, content={})
