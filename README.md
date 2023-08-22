@@ -1,13 +1,13 @@
 ---
 title: Toypdf
 emoji: 📉
-colorFrom: pink
+colorFrom: blue
 colorTo: red
 sdk: docker
-app_port: 8080
+app_port: 8501
 pinned: true
-models: ["gpt2"]
-datasets: ["oscar-corpus/OSCAR-2109"]
+models: ["sentence-transformers/all-MiniLM-L6-v2"]
+datasets: ["multi_nli"]
 ---
 
 Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
