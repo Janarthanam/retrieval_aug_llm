@@ -91,5 +91,5 @@ class QdrantVectorStore(Store):
     def list_collections(self) -> list[dict]:
         """ return a list of collections.
         """
-        return [ c for i,c in enumerate(self.client.get_collections().collections)]
+        return [ c.dict() for i,c in enumerate(self.client.get_collections().collections)]
     

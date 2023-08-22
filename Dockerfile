@@ -20,7 +20,7 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 COPY --chown=user run.sh api fe .
 
 # Expose the port the app runs on
-EXPOSE 8080
+EXPOSE 8080 8501
 
 #todo these keys are environment specific
 ENV OPENAI_API_KEY=zzz
