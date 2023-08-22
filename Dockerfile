@@ -1,6 +1,12 @@
 # Use an official Python base image
 FROM python:3.10-slim
 
+# Set up a new user named "user" with user ID 1000
+RUN useradd -m -u 1000 user
+
+# Switch to the "user" user
+USER user
+
 # Set the working directory
 WORKDIR /app
 
@@ -11,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Copy the rest of the application code into the container
-COPY run.sh api fe .
+COPY --chown=user run.sh api fe .
 
 # Expose the port the app runs on
 EXPOSE 8080

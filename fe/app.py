@@ -8,13 +8,15 @@ BE = os.getenv("be_url")
 
 datasets = requests.get(f"{BE}/v1/datasets", timeout=500).json()
 
-st.sidebar.title("datasets")
-ds = st.sidebar.selectbox(datasets)
+st.sidebar.title("Datasets")
+ds = st.sidebar.selectbox(options=[ d["name"] for d in datasets], 
+                          label="Select your dataset")
 
 query = st.text_input("Enter your search query")
+print(query)
 
+answer = requests.get(f"http://localhost:8080/v1/datasets/{ds}/answer?query={query}", 
+                       timeout=5000 )
 
-answer = requests.post(f"http://localhost:8080/v1/datasets/{ds}", 
-                       timeout=5000, json={'query': query} )
-
-st.text = answer
+print(answer.json()["answer"])
+st.write(answer.json()["answer"])
