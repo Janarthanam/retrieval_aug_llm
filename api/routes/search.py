@@ -30,7 +30,8 @@ async def answer(name: str, query: str):
     docs = _db.similarity_search_with_score(query=query)
     print(docs)
     answer = _chain.run(input_documents=[tup[0] for tup in docs], question=query)
-    return JSONResponse(status_code=200, content={"answer": answer, "file_score": [[f"{d[0].metadata['file']} : {d[0].metadata['page']}", d[1]] for d in docs]}) 
+    return JSONResponse(status_code=200, content={"answer": answer, "metadata": [
+        {"file": d[0].metadata['file'], "page" : d[0].metadata['page'], "score": d[1]} for d in docs]}) 
 
 
 @router.get("/v1/datasets")
