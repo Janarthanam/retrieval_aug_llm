@@ -16,10 +16,13 @@ if ds:
     query = st.text_input("Enter your search query",
                           placeholder="Ask your question")
     if query:
-        answer = requests.get(f"http://localhost:8080/v1/datasets/{ds}/answer?query={query}", 
-                       timeout=5000 )
+        res = requests.get(f"{BE}/v1/datasets/{ds}/answer?query={query}", 
+                       timeout=5000 ).json()
+        answer = res["answer"]
 
-        print(answer.json()["answer"])
-        st.write(answer.json()["answer"])
+        st.write(answer)
+        files = [f"{f['file']}, page {f['page']}" for f in res["metadata"]]
+        for fi in files:
+            st.markdown(f"- {fi}")
 else:
     st.write("Choose your dataset!")
