@@ -16,7 +16,7 @@ if ds:
     query = st.text_input("Enter your search query",
                           placeholder="Ask your question")
     if query:
-        res = requests.get(f"http://localhost:8080/v1/datasets/{ds}/answer?query={query}", 
+        res = requests.get(f"{BE}/v1/datasets/{ds}/answer?query={query}", 
                        timeout=5000 ).json()
         answer = res["answer"]
 
