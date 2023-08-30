@@ -3,7 +3,7 @@
 from typing import Annotated
 
 from db.vector_store import Store
-from document_parsing import generate_documents
+from parsers.document_parsers import Parser
 
 from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
@@ -41,7 +41,8 @@ async def update(name: Annotated[str, Body()], file_name: Annotated[str, Body()]
     if not _db:
         return JSONResponse(status_code=404, content={})
 
-    async for doc in generate_documents(file, file_name):
+    docs = await Parser.get_instance(file).parse(file, file_name)
+    for doc in docs:
         print(doc)
         _db.add_documents([doc])
     return JSONResponse(status_code=200, content={"name": name})

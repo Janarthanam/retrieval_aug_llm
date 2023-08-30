@@ -3,7 +3,7 @@ uvicorn
 fastapi
 python-multipart
 numpy
-pypdf
+pymupdf
 langchain
 tiktoken
 faiss-cpu
@@ -11,3 +11,4 @@ qdrant-client
 elasticsearch
 sentence_transformers
 streamlit
+python-doctr

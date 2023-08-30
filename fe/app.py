@@ -3,8 +3,7 @@ import requests
 
 import streamlit as st
 
-BE = os.getenv("be_url")
-
+BE = os.getenv("be_url", "http://localhost:8080")
 
 datasets = requests.get(f"{BE}/v1/datasets", timeout=500).json()
 
