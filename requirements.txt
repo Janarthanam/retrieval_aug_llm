@@ -6,7 +6,6 @@ numpy
 pymupdf
 langchain
 tiktoken
-faiss-cpu
 qdrant-client
 elasticsearch
 sentence_transformers
