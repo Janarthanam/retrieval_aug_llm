@@ -27,6 +27,8 @@ ENV OPENAI_API_KEY=zzz
 ENV QDRANT_URL="https://32f125d3-5ab1-4058-a10a-bd38a1ebd647.us-east-1-0.aws.cloud.qdrant.io"
 ENV STORE="QDRANT"
 ENV be_url="http://127.0.0.1:8080"
+ENV CELERY_BROKER_URL=redis://redis:6379/0
+ENV CELERY_RESULT_BACKEND=redis://redis:6379/0
 
 # Start the application using Uvicorn
 CMD ["/bin/sh", "./run.sh"]

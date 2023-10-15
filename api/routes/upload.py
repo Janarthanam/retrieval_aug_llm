@@ -9,6 +9,9 @@ from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, UploadFile, File, Body
 
+from celery import Celery
+from celery_worker.worker import index_doc
+
 router = APIRouter()
 
 @router.put("/v1/datasets")
@@ -36,14 +39,12 @@ async def update(name: Annotated[str, Body()], file_name: Annotated[str, Body()]
     """
     
     #TODO return meaningful info
-
     _db = Store.get_instance().get_collection(name)
     if not _db:
         return JSONResponse(status_code=404, content={})
 
     docs = await Parser.get_instance(file).parse(file, file_name)
-    for doc in docs:
-        print(doc)
-        _db.add_documents([doc])
+    index_doc.delay(name, docs)
     return JSONResponse(status_code=200, content={"name": name})
+
 

@@ -1,0 +1,20 @@
+version: '3'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: retriever_aug_llm/latest
+  
+  celery:
+      build: api
+      command: celery -A worker.celery worker --loglevel=info
+      environment:
+        - CELERY_BROKER_URL=redis://redis:6379/0
+        - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      depends_on:
+        - api
+        - redis
+
+  redis:
+      image: redis:7
