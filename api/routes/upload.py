@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from fastapi import APIRouter, UploadFile, File, Body
 
 from celery import Celery
-from celery_worker.worker import index_doc
+from worker import index_doc
 
 router = APIRouter()
 
@@ -44,7 +44,7 @@ async def update(name: Annotated[str, Body()], file_name: Annotated[str, Body()]
         return JSONResponse(status_code=404, content={})
 
     docs = await Parser.get_instance(file).parse(file, file_name)
-    index_doc.delay(name, docs)
+    index_doc.delay(name, file, file_name)
     return JSONResponse(status_code=200, content={"name": name})
 
 

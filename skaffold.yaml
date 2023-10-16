@@ -1,0 +1,16 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: retrieval-aug-llm
+build:
+  local: {}
+  artifacts:
+    - image: retriever_aug_llm
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - api-deployment.yaml
+    - api-service.yaml
+    - redis-deployment.yaml
+    - redis-service.yaml

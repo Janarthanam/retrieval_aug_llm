@@ -4,6 +4,7 @@ import requests
 import streamlit as st
 
 BE = os.getenv("be_url", "http://localhost:8080")
+print(BE)
 
 datasets = requests.get(f"{BE}/v1/datasets", timeout=500).json()
 

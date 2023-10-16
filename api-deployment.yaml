@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.31.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: api
+  name: api
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: api
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.31.0 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/retrieval-aug-llm-default: "true"
+        io.kompose.service: api
+    spec:
+      containers:
+        - env:
+            - name: OPENAI_API_KEY
+              value: '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'
+            - name: CELERY_BROKER_URL
+              value: 'redis://redis:6379/0'
+            - name: CELERY_RESULT_BACKEND
+              value: 'redis://redis:6379/0'
+          image: retriever_aug_llm:latest
+          name: api
+          ports:
+            - containerPort: 8501
+              protocol: TCP
+            - containerPort: 8080
+              protocol: TCP
+          resources: {}
+      restartPolicy: Always
+status: {}

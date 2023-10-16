@@ -12,3 +12,5 @@ sentence_transformers
 streamlit
 python-doctr
 celery
+redis
+

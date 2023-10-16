@@ -5,7 +5,6 @@ from fastapi.responses import JSONResponse
 import openai
 import io
 import os
-from pypdf import PdfReader
 from langchain.schema import Document
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
