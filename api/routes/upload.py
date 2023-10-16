@@ -42,9 +42,9 @@ async def update(name: Annotated[str, Body()], file_name: Annotated[str, Body()]
     _db = Store.get_instance().get_collection(name)
     if not _db:
         return JSONResponse(status_code=404, content={})
-
-    docs = await Parser.get_instance(file).parse(file, file_name)
-    index_doc.delay(name, file, file_name)
+    
+    doc_text = await file.read()
+    index_doc.delay(name, file.content_type, doc_text, file_name)
     return JSONResponse(status_code=200, content={"name": name})
 
 

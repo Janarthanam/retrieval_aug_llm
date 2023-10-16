@@ -15,9 +15,18 @@ class Parser:
         sometimes you need to do more than file type for the right
         kind of parser to be returned.
         """
-        if file.content_type == "application/pdf":
+        Parser.get_instance(file.content_type)
+    
+    @staticmethod
+    def get_instance(content_type: str) -> "Parser":
+        """
+        get instance based on the file type.
+        sometimes you need to do more than file type for the right
+        kind of parser to be returned.
+        """
+        if content_type == "application/pdf":
             return PdfParser()
-        elif "text" in file.content_type:
+        elif not content_type or "text" in content_type:
             return TextParser()
         else:
             raise ValueError("Unsupported file type")
@@ -34,20 +43,27 @@ class Parser:
             for i, page in enumerate(pages)
         ]
 
-    async def parse(self, file: UploadFile, name: str) -> list[Document]:
+    async def parse(self, file: UploadFile|bytes, name: str) -> list[Document]:
         """
         parse and return a list of documents
         """
-        content = await file.read()
-        return self._parse_text(lambda: content, name)
+        if type(file) is UploadFile:
+            content = await file.read()
+        else:
+            content = file
+        return self._parse_text(lambda: content, name) # type: ignore
 
 
 class TextParser(Parser):
     pass
 
 class PdfParser(Parser):
-    async def parse(self, file: UploadFile, name: str) -> list[Document]:
-        doc = fitz.open(stream = await file.read())
+    async def parse(self, file: UploadFile|bytes, name: str) -> list[Document]:
+        if type(file) is UploadFile:
+            f = await file.read()
+        else:
+            f = file
+        doc = fitz.open(stream = f)
         return super()._parse_text(
             lambda: "".join([page.get_text() for page in doc]), name 
         )
