@@ -15,7 +15,7 @@ def index_doc(name, content_type, bytes, file_name):
     db = Store.get_instance().get_collection(name)
 
     docs = asyncio.run(Parser.get_instance(content_type).parse(bytes, file_name))
-        
+    print(os.environ.get("QDRANT_API_KEY"))
     for doc in docs:
         print(type(doc))
         db.add_documents([doc])

@@ -1,6 +1,6 @@
 #!/bin/bash
 python -m uvicorn "main:app" "--host" "0.0.0.0" "--port" "8080" &
-python3 -m celery -A worker.celery worker --loglevel=info &
+python3 -m celery -A worker.celery worker --loglevel=debug &
 
 #active wait- container won't quit
 while ! timeout 1 bash -c "echo > /dev/tcp/localhost/8080"; do sleep 5; done
