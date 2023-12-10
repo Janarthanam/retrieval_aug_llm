@@ -3,7 +3,8 @@ from functools import cache
 import os
 from qdrant_client import QdrantClient
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-from langchain.vectorstores import Qdrant, ElasticVectorSearch, VectorStore
+from langchain.vectorstores.base import VectorStore
+from langchain.vectorstores import Qdrant, ElasticVectorSearch
 from qdrant_client.models import VectorParams, Distance
 from db.embedding import Embedding, EMBEDDINGS
 
@@ -60,7 +61,7 @@ class ElasticVectorStore(Store):
     def __init__(self, embeddings):
         super().__init__(embeddings)
 
-    def get_collection(self, collection:str) -> ElasticVectorSearch:
+    def get_collection(self, collection: str="test") -> ElasticVectorSearch:
         return ElasticVectorSearch(elasticsearch_url= os.getenv("ES_URL"),
                                index_name= collection, embedding=self.embedding.embedding)
     
@@ -79,7 +80,7 @@ class QdrantVectorStore(Store):
         self.client = QdrantClient(url=os.getenv("QDRANT_URL"),
                                         api_key=os.getenv("QDRANT_API_KEY"))
 
-    def get_collection(self, collection: str) -> Qdrant:  
+    def get_collection(self, collection: str="test") -> Qdrant:  
         return Qdrant(client=self.client,collection_name=collection,
                       embeddings=self.embedding.embedding)
 

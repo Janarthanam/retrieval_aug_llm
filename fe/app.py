@@ -5,6 +5,12 @@ import streamlit as st
 
 BE = os.getenv("be_url", "http://localhost:8080")
 
+def get_answer(ds: str, query: str, llm: str) -> (str,dict):     
+    res = requests.get(f"{BE}/v1/datasets/{ds}/answer?query={query}&llm={llm}", 
+                        timeout=5000 ).json()
+    return res["answer"], res["metadata"]
+
+print(BE)
 datasets = requests.get(f"{BE}/v1/datasets", timeout=500).json()
 
 st.sidebar.title("Datasets")
@@ -15,12 +21,13 @@ if ds:
     query = st.text_input("Enter your search query",
                           placeholder="Ask your question")
     if query:
-        res = requests.get(f"{BE}/v1/datasets/{ds}/answer?query={query}", 
-                       timeout=5000 ).json()
-        answer = res["answer"]
+        openai,openai_meta = get_answer(ds, query, "openai");
+        llama,llama_meta = get_answer(ds, query, "llama2");
 
-        st.write(answer)
-        files = [f"{f['file']}, page {f['page']}" for f in res["metadata"]]
+        st.write(f"openai: {openai}")
+        st.write(f"llama: {llama}")
+
+        files = [f"{f['file']}, page {f['page']}" for f in openai_meta]
         for fi in files:
             st.markdown(f"- {fi}")
 else:

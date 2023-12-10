@@ -5,19 +5,15 @@ from fastapi.responses import JSONResponse
 import openai
 import io
 import os
-from pypdf import PdfReader
 from langchain.schema import Document
-from langchain.chains.question_answering import load_qa_chain
-from langchain.llms import OpenAI
 from langchain.text_splitter import SentenceTransformersTokenTextSplitter
 from db.vector_store import Store
+from llm.qa import get_llm_qa
 
 router = APIRouter()
-_chain = load_qa_chain(OpenAI(temperature=0), chain_type="stuff", verbose=True)
-
 
 @router.get("/v1/datasets/{name}/answer")
-async def answer(name: str, query: str):
+async def answer(name: str, query: str, llm: str):
     """ Answer a question from the doc
     Parameters:
     - `name` of the doc.
@@ -27,9 +23,9 @@ async def answer(name: str, query: str):
     """
     _db = Store.get_instance().get_collection(name)
     print(query)
-    docs = _db.similarity_search_with_score(query=query)
-    print(docs)
-    answer = _chain.run(input_documents=[tup[0] for tup in docs], question=query)
+    docs = _db.similarity_search_with_score(query=query,k=2)
+    print(len(docs))
+    answer = get_llm_qa(llm).run(input_documents=[tup[0] for tup in docs], question=query)
     return JSONResponse(status_code=200, content={"answer": answer, "metadata": [
         {"file": d[0].metadata['file'], "page" : d[0].metadata['page'], "score": d[1]} for d in docs]}) 
 
